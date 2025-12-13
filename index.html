@@ -12,7 +12,7 @@
 <div id="loginPage" class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
   <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">Super Faucet</h1>
 
-  <input id="loginUsername" type="text" placeholder="Usuario" class="w-full mb-4 p-3 border rounded">
+  <input id="loginEmail" type="email" placeholder="Correo electrónico" class="w-full mb-4 p-3 border rounded">
   <input id="loginPassword" type="password" placeholder="Contraseña" class="w-full mb-4 p-3 border rounded">
   <button id="loginButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded mb-2">Ingresar</button>
   <button id="goToRegister" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded">Crear Cuenta</button>
@@ -23,8 +23,8 @@
 <div id="registerPage" class="hidden w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
   <h1 class="text-2xl font-bold mb-6 text-center text-green-600">Crear Cuenta</h1>
 
-  <input id="registerUsername" type="text" placeholder="Nuevo usuario" class="w-full mb-4 p-3 border rounded">
-  <input id="registerPassword" type="password" placeholder="Nueva contraseña" class="w-full mb-4 p-3 border rounded">
+  <input id="registerEmail" type="email" placeholder="Correo electrónico" class="w-full mb-4 p-3 border rounded">
+  <input id="registerPassword" type="password" placeholder="Contraseña" class="w-full mb-4 p-3 border rounded">
   <button id="registerButton" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded mb-2">Registrar</button>
   <button id="backToLogin" class="w-full bg-gray-300 hover:bg-gray-400 text-black font-bold py-3 rounded">Volver a Login</button>
   <p id="registerMessage" class="mt-4 text-red-600 font-semibold text-center"></p>
@@ -45,7 +45,6 @@
 </div>
 
 <script>
-  // Elementos del DOM
   const loginPage = document.getElementById("loginPage");
   const registerPage = document.getElementById("registerPage");
   const faucetPage = document.getElementById("faucetPage");
@@ -99,7 +98,7 @@
     startCooldown();
   });
 
-  // Funciones de autenticación
+  // Mostrar faucet
   function showFaucet() {
     loginPage.classList.add("hidden");
     registerPage.classList.add("hidden");
@@ -107,42 +106,44 @@
     timerDisplay.textContent = formatTime(cooldown);
   }
 
+  // Login
   function loginUser() {
-    const username = document.getElementById("loginUsername").value.trim();
+    const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
 
     let users = JSON.parse(localStorage.getItem("users") || "{}");
 
-    if(users[username] && users[username] === password) {
-      localStorage.setItem("loggedIn", username);
+    if(users[email] && users[email] === password) {
+      localStorage.setItem("loggedIn", email);
       showFaucet();
     } else {
-      loginMessage.textContent = "Usuario o contraseña incorrectos.";
+      loginMessage.textContent = "Correo o contraseña incorrectos.";
     }
   }
 
+  // Crear cuenta
   function registerUser() {
-    const username = document.getElementById("registerUsername").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
     const password = document.getElementById("registerPassword").value.trim();
 
-    if (!username || !password) {
-      registerMessage.textContent = "Completa ambos campos para registrar.";
+    if (!email || !password) {
+      registerMessage.textContent = "Completa ambos campos.";
       return;
     }
 
     let users = JSON.parse(localStorage.getItem("users") || "{}");
 
-    if (users[username]) {
-      registerMessage.textContent = "El usuario ya existe.";
+    if (users[email]) {
+      registerMessage.textContent = "Este correo ya está registrado.";
       return;
     }
 
-    users[username] = password;
+    users[email] = password;
     localStorage.setItem("users", JSON.stringify(users));
     registerMessage.textContent = "Cuenta creada. Puedes volver a login.";
   }
 
-  // Navegación entre login y registro
+  // Navegación login / registro
   goToRegister.addEventListener("click", () => {
     loginPage.classList.add("hidden");
     registerPage.classList.remove("hidden");
@@ -158,6 +159,7 @@
   loginButton.addEventListener("click", loginUser);
   registerButton.addEventListener("click", registerUser);
 
+  // Logout
   logoutButton.addEventListener("click", () => {
     localStorage.removeItem("loggedIn");
     faucetPage.classList.add("hidden");
@@ -168,7 +170,6 @@
   if(localStorage.getItem("loggedIn")) {
     showFaucet();
   }
-
 </script>
 </body>
 </html>
