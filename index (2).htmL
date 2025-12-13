@@ -1,0 +1,44 @@
+<!-- Página de Crear Cuenta Actualizada -->
+<div id="registerPage" class="hidden w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
+  <h1 class="text-2xl font-bold mb-6 text-center text-green-600">Crear Cuenta</h1>
+
+  <input id="registerEmail" type="email" placeholder="Correo electrónico" class="w-full mb-4 p-3 border rounded">
+  <input id="registerUsername" type="text" placeholder="Usuario" class="w-full mb-4 p-3 border rounded">
+  <input id="registerName" type="text" placeholder="Nombre completo" class="w-full mb-4 p-3 border rounded">
+  <input id="registerPassword" type="password" placeholder="Contraseña" class="w-full mb-4 p-3 border rounded">
+  <input id="registerCountry" type="text" placeholder="País" class="w-full mb-4 p-3 border rounded">
+
+  <button id="registerButton" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded mb-2">Registrar</button>
+  <button id="backToLogin" class="w-full bg-gray-300 hover:bg-gray-400 text-black font-bold py-3 rounded">Volver a Login</button>
+  <p id="registerMessage" class="mt-4 text-red-600 font-semibold text-center"></p>
+</div>
+
+<script>
+  // Función de registro actualizada
+  function registerUser() {
+    const email = document.getElementById("registerEmail").value.trim();
+    const username = document.getElementById("registerUsername").value.trim();
+    const name = document.getElementById("registerName").value.trim();
+    const password = document.getElementById("registerPassword").value.trim();
+    const country = document.getElementById("registerCountry").value.trim();
+
+    if (!email || !username || !name || !password || !country) {
+      document.getElementById("registerMessage").textContent = "Completa todos los campos.";
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (users[email]) {
+      document.getElementById("registerMessage").textContent = "Este correo ya está registrado.";
+      return;
+    }
+
+    // Guardar datos del usuario
+    users[email] = { username, name, password, country };
+    localStorage.setItem("users", JSON.stringify(users));
+    document.getElementById("registerMessage").textContent = "Cuenta creada. Puedes volver a login.";
+  }
+
+  document.getElementById("registerButton").addEventListener("click", registerUser);
+</script>
