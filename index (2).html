@@ -1,0 +1,17 @@
+let timer = 300; // 5 minutos en segundos
+const timerEl = document.getElementById("timer");
+
+function updateTimer() {
+  const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
+  const seconds = String(timer % 60).padStart(2, '0');
+  timerEl.textContent = `${minutes}:${seconds}`;
+  if (timer > 0) timer--;
+  else clearInterval(timerInterval);
+}
+
+const timerInterval = setInterval(updateTimer, 1000);
+
+document.getElementById("claimBtn").addEventListener("click", () => {
+  alert("¡Has reclamado tu Bitcoin!");
+  timer = 300; // reinicia el timer
+});
