@@ -2,38 +2,74 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>SuperMM Faucet</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-      text-align: center;
-      padding: 40px;
-    }
-    .box {
-      background: #020617;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 420px;
-      margin: auto;
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Faucet Mejorada</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
 
-  <div class="box">
-    <h1>SuperMM Faucet</h1>
-    <p>Reclama criptomonedas cada 5 minutos</p>
-    <button>Claim Faucet</button>
-    <p style="margin-top:20px;font-size:14px;">Powered by FaucetPay</p>
+  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md text-center">
+    <h1 class="text-3xl font-bold mb-4 text-blue-600">Super Faucet</h1>
+    <p class="mb-6 text-gray-700">Reclama criptomonedas cada <span id="timer">5:00</span> minutos</p>
+
+    <button id="claimButton" 
+            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded w-full transition-transform transform hover:scale-105">
+      Claim Faucet
+    </button>
+
+    <p id="message" class="mt-4 text-green-600 font-semibold"></p>
   </div>
 
+  <script>
+    // Elementos del DOM
+    const claimButton = document.getElementById('claimButton');
+    const timerDisplay = document.getElementById('timer');
+    const message = document.getElementById('message');
+
+    // Configuración del temporizador
+    let cooldown = 300; // 5 minutos en segundos
+    let canClaim = true;
+
+    // Función para dar formato al tiempo
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    // Inicia el temporizador
+    function startCooldown() {
+      canClaim = false;
+      claimButton.disabled = true;
+      claimButton.classList.add("opacity-50", "cursor-not-allowed");
+
+      const interval = setInterval(() => {
+        cooldown--;
+        timerDisplay.textContent = formatTime(cooldown);
+
+        if (cooldown <= 0) {
+          clearInterval(interval);
+          canClaim = true;
+          claimButton.disabled = false;
+          claimButton.classList.remove("opacity-50", "cursor-not-allowed");
+          cooldown = 300; // Reset 5 minutos
+          timerDisplay.textContent = formatTime(cooldown);
+        }
+      }, 1000);
+    }
+
+    // Evento del botón
+    claimButton.addEventListener('click', () => {
+      if (!canClaim) return;
+
+      // Aquí iría la lógica real de enviar criptomonedas
+      message.textContent = '¡Felicidades! Has reclamado tus monedas.';
+      startCooldown();
+    });
+
+    // Inicializa el temporizador
+    timerDisplay.textContent = formatTime(cooldown);
+  </script>
 </body>
 </html>
