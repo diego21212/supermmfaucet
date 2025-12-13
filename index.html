@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Faucet Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+<!-- Página de Login -->
+<div id="loginPage" class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
+  <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">Super Faucet</h1>
+
+  <input id="loginEmail" type="email" placeholder="Correo electrónico" class="w-full mb-4 p-3 border rounded">
+  <input id="loginPassword" type="password" placeholder="Contraseña" class="w-full mb-4 p-3 border rounded">
+  <button id="loginButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded mb-2">Ingresar</button>
+  <button id="goToRegister" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded">Crear Cuenta</button>
+  <p id="loginMessage" class="mt-4 text-red-600 font-semibold text-center"></p>
+</div>
+
+<!-- Página de Crear Cuenta -->
+<div id="registerPage" class="hidden w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
+  <h1 class="text-2xl font-bold mb-6 text-center text-green-600">Crear Cuenta</h1>
+
+  <input id="registerEmail" type="email" placeholder="Correo electrónico" class="w-full mb-4 p-3 border rounded">
+  <input id="registerPassword" type="password" placeholder="Contraseña" class="w-full mb-4 p-3 border rounded">
+  <button id="registerButton" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded mb-2">Registrar</button>
+  <button id="backToLogin" class="w-full bg-gray-300 hover:bg-gray-400 text-black font-bold py-3 rounded">Volver a Login</button>
+  <p id="registerMessage" class="mt-4 text-red-600 font-semibold text-center"></p>
+</div>
+
+<!-- Página de Faucet -->
+<div id="faucetPage" class="hidden w-full max-w-md bg-white shadow-lg rounded-xl p-8 text-center">
+  <h1 class="text-3xl font-bold mb-4 text-blue-600">Super Faucet</h1>
+  <p class="mb-6 text-gray-700">Reclama criptomonedas cada <span id="timer">5:00</span> minutos</p>
+
+  <button id="claimButton" 
+          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded w-full transition-transform transform hover:scale-105 mb-4">
+    Claim Faucet
+  </button>
+
+  <p id="message" class="mt-4 text-green-600 font-semibold"></p>
+  <button id="logoutButton" class="mt-4 text-red-600 underline">Cerrar sesión</button>
+</div>
+
+<script>
+  const loginPage = document.getElementById("loginPage");
+  const registerPage = document.getElementById("registerPage");
+  const faucetPage = document.getElementById("faucetPage");
+
+  const loginButton = document.getElementById("loginButton");
+  const goToRegister = document.getElementById("goToRegister");
+  const registerButton = document.getElementById("registerButton");
+  const backToLogin = document.getElementById("backToLogin");
+  const logoutButton = document.getElementById("logoutButton");
+
+  const loginMessage = document.getElementById("loginMessage");
+  const registerMessage = document.getElementById("registerMessage");
+
+  const claimButton = document.getElementById('claimButton');
+  const timerDisplay = document.getElementById('timer');
+  const message = document.getElementById('message');
+
+  let cooldown = 300;
+  let canClaim = true;
+
+  // Temporizador faucet
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2,'0')}`;
+  }
+
+  function startCooldown() {
+    canClaim = false;
+    claimButton.disabled = true;
+    claimButton.classList.add("opacity-50", "cursor-not-allowed");
+
+    const interval = setInterval(() => {
+      cooldown--;
+      timerDisplay.textContent = formatTime(cooldown);
+
+      if (cooldown <= 0) {
+        clearInterval(interval);
+        canClaim = true;
+        claimButton.disabled = false;
+        claimButton.classList.remove("opacity-50", "cursor-not-allowed");
+        cooldown = 300;
+        timerDisplay.textContent = formatTime(cooldown);
+      }
+    }, 1000);
+  }
+
+  claimButton.addEventListener('click', () => {
+    if (!canClaim) return;
+    message.textContent = '¡Felicidades! Has reclamado tus monedas.';
+    startCooldown();
+  });
+
+  // Mostrar faucet
+  function showFaucet() {
+    loginPage.classList.add("hidden");
+    registerPage.classList.add("hidden");
+    faucetPage.classList.remove("hidden");
+    timerDisplay.textContent = formatTime(cooldown);
+  }
+
+  // Login
+  function loginUser() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
+    let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if(users[email] && users[email] === password) {
+      localStorage.setItem("loggedIn", email);
+      showFaucet();
+    } else {
+      loginMessage.textContent = "Correo o contraseña incorrectos.";
+    }
+  }
+
+  // Crear cuenta
+  function registerUser() {
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value.trim();
+
+    if (!email || !password) {
+      registerMessage.textContent = "Completa ambos campos.";
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (users[email]) {
+      registerMessage.textContent = "Este correo ya está registrado.";
+      return;
+    }
+
+    users[email] = password;
+    localStorage.setItem("users", JSON.stringify(users));
+    registerMessage.textContent = "Cuenta creada. Puedes volver a login.";
+  }
+
+  // Navegación login / registro
+  goToRegister.addEventListener("click", () => {
+    loginPage.classList.add("hidden");
+    registerPage.classList.remove("hidden");
+    loginMessage.textContent = "";
+  });
+
+  backToLogin.addEventListener("click", () => {
+    registerPage.classList.add("hidden");
+    loginPage.classList.remove("hidden");
+    registerMessage.textContent = "";
+  });
+
+  loginButton.addEventListener("click", loginUser);
+  registerButton.addEventListener("click", registerUser);
+
+  // Logout
+  logoutButton.addEventListener("click", () => {
+    localStorage.removeItem("loggedIn");
+    faucetPage.classList.add("hidden");
+    loginPage.classList.remove("hidden");
+  });
+
+  // Verificar sesión al cargar
+  if(localStorage.getItem("loggedIn")) {
+    showFaucet();
+  }
+</script>
+</body>
+</html>
